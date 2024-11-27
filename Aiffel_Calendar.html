@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootcamp Calendar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <script defer src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script defer src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script defer src="https://unpkg.com/lodash/lodash.min.js"></script>
+    <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script defer src="https://unpkg.com/lucide@0.97.0/lucide.min.js"></script>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React; const { ChevronLeft, ChevronRight } = lucide; const debounce = _.debounce; function Calendar() { const moduleColors = { '아이펠 적응하기': 'bg-yellow-200 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-200', '파이썬 마스터':
+        'bg-green-200 dark:bg-green-900 text-green-900 dark:text-green-200', '머신러닝 첫 걸음': 'bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200', '딥러닝 첫걸음': 'bg-orange-200 dark:bg-orange-900 text-orange-900 dark:text-orange-200', 'Datathon':
+        'bg-red-200 dark:bg-red-900 text-red-900 dark:text-red-200', '플러터 맛보기': 'bg-purple-200 dark:bg-purple-900 text-purple-900 dark:text-purple-200', '딥러닝 마스터': 'bg-pink-200 dark:bg-pink-900 text-pink-900 dark:text-pink-200', 'DLthon': 'bg-indigo-200
+        dark:bg-indigo-900 text-indigo-900 dark:text-indigo-200', 'AI 앱 프로젝트': 'bg-cyan-200 dark:bg-cyan-900 text-cyan-900 dark:text-cyan-200', '내가 만든 AI 앱': 'bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200', '더 넓은 세상으로!': 'bg-violet-200
+        dark:bg-violet-900 text-violet-900 dark:text-violet-200' }; const curriculumData = { // Curriculum data is omitted for brevity }; const [currentDate, setCurrentDate] = useState(() => { const urlParams = new URLSearchParams(window.location.search);
+        const month = parseInt(urlParams.get('month')) || 11; // 기본값 11월 const year = parseInt(urlParams.get('year')) || 2024; return new Date(year, month - 1); }); const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0); const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)); const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(),
+        currentDate.getMonth() + 1)); const formatDateToString = (date) => { const year = date.getFullYear(); const month = String(date.getMonth() + 1).padStart(2, '0'); const day = String(date.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`;
+        }; const formatMonthYear = (date) => { return new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long' }).format(date); }; const getDaysArray = () => { const days = []; const firstDay = firstDayOfMonth.getDay(); const totalCells = 6 *
+        7; // 6 weeks, 7 days per week for (let i = 0; i
+        < firstDay; i++) { const prevDate=n ew Date(firstDayOfMonth); prevDate.setDate(prevDate.getDate() - (firstDay - i)); days.push({ date: prevDate, isCurrentMonth: false }); } for (let i=1
+            ; i <=l astDayOfMonth.getDate(); i++) { const date=n ew Date(firstDayOfMonth); date.setDate(i); days.push({ date, isCurrentMonth: true }); } const remainingDays=t otalCells - days.length; for (let i=1 ; i <=r emainingDays; i++) { const nextDate=n
+            ew Date(lastDayOfMonth); nextDate.setDate(lastDayOfMonth.getDate() + i); days.push({ date: nextDate, isCurrentMonth: false }); } return days; }; const renderDay=( dayInfo, index)=> { const dateStr = formatDateToString(dayInfo.date); const events = curriculumData[dateStr]; return (
+            <div key={index} className={` p-2 min-h-24 bg-white dark:bg-gray-800 ${!dayInfo.isCurrentMonth ? 'text-gray-400 dark:text-gray-500' : 'dark:text-white'} ${index < 7 ? '' : 'border-t border-gray-200 dark:border-gray-700'} ${index % 7===0 ? '' :
+                'border-l border-gray-200 dark:border-gray-700'} `}>
+                <div className="text-sm">{dayInfo.date.getDate()}</div>
+                {renderEvents(events)}
+            </div>
+            ); }; const renderEvents = (events) => { if (events && Array.isArray(events)) { return events.map((event, idx) => (
+            <div key={idx} className={` mt-1 p-1 text-xs rounded ${moduleColors[event.module]} hover:opacity-80 transition-opacity cursor-pointer `} title={`${event.module}: ${event.title}`}>
+                {event.title}
+            </div>
+            )); } else if (events) { return (
+            <div className={` mt-1 p-1 text-xs rounded ${moduleColors[events.module]} hover:opacity-80 transition-opacity cursor-pointer `} title={`${events.module}: ${events.title}`}>
+                {events.title}
+            </div>
+            ); } return null; }; useEffect( debounce(() => { const month = currentDate.getMonth() + 1; const year = currentDate.getFullYear(); const newUrl = `${window.location.pathname}?month=${month}&year=${year}`; window.history.pushState({}, '', newUrl); document.title
+            = `AIFFEL 일정 - ${year}년 ${month}월`; }, 300), [currentDate] ); return (
+            <div className="w-full max-w-7xl mx-auto p-4 dark:bg-gray-900 min-h-screen">
+                <div className="flex items-center justify-between mb-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                    <h2 className="text-xl font-bold dark:text-white">{formatMonthYear(currentDate)}</h2>
+                    <div className="flex gap-2">
+                        <button onClick={prevMonth} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                <ChevronLeft className="w-5 h-5 dark:text-white" />
+                            </button>
+                        <button onClick={nextMonth} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                <ChevronRight className="w-5 h-5 dark:text-white" />
+                            </button>
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+                    <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700">
+                        {['일', '월', '화', '수', '목', '금', '토'].map(day => (
+                        <div key={day} className="p-2 text-center font-medium bg-white dark:bg-gray-800 dark:text-white">
+                            {day}
+                        </div>
+                        ))} {getDaysArray().map(renderDay)}
+                    </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                    {Object.entries(moduleColors).map(([module, color]) => (
+                    <div key={module} className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded ${color}`}></div>
+                        <span className="text-sm dark:text-white">{module}</span>
+                    </div>
+                    ))}
+                </div>
+            </div>
+            ); } ReactDOM.render(
+
+            <Calendar />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>
